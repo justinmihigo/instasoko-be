@@ -14,10 +14,10 @@ const shopValidator=(
    const shopSchema= Joi.object({
         name: Joi.string().min(10).required(),
         address: Joi.object({
-            district: Joi.string().required(),
-            sector: Joi.string().required(),
-            cell: Joi.string().required(),
-            village: Joi.string().required(),
+            district: Joi.string().required(), 
+            sector: Joi.string(), // not required
+            cell: Joi.string(), // not required
+            village: Joi.string(), // not required
             houseNo: Joi.string(),
             zipcode: Joi.string(),
             postalcode: Joi.string(),
