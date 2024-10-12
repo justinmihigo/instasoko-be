@@ -11,8 +11,10 @@ export interface Iaddress {
 
 };
 export interface Iuser {
-    email: string;
+    email?: string;
+    uid:string;
     name: string;
+    image?: string;
     password: string;
     address?:Iaddress,
     phoneNo:string,
