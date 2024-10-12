@@ -5,6 +5,8 @@ import { Iaddress } from "../types/user.type";
 export const signupValidator=(
     user:{
     name:string,
+    image?:string, 
+    uid?:string,
     email:string,
     password:string,
     address:Iaddress, 
@@ -13,7 +15,9 @@ export const signupValidator=(
 })=>{
     const userSchema= Joi.object({
         name: Joi.string().min(4),
-        email: Joi.string().email().required(),
+        email: Joi.string(),
+        uid: Joi.string().required(),
+        image: Joi.string(),
         password: Joi.string().min(6).required(),
         address: Joi.object({
             district: Joi.string().required(),
