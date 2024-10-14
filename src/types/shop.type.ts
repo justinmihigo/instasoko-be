@@ -3,9 +3,10 @@ import { Iaddress } from "./user.type";
 
 export interface Ishop{
     name: string,
-    address: Iaddress,
+    address?: Iaddress,
     owner: ObjectId,
-    rating: string
+    rating: string,
+    images?: string[];
     tagline: string,
     description : string,
     createdAt: Date,
