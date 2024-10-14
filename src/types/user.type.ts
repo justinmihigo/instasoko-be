@@ -13,14 +13,14 @@ export interface Iaddress {
 export interface Iuser {
     email?: string;
     uid:string;
-    name: string;
+    name?: string;
     image?: string;
     password?: string;
     address?:Iaddress,
     phoneNo?:string,
     dob?:Date,
     gender?: string,
-    role:string,
+    role?:string,
     createdAt:Date,
     updatedAt: Date,
 }
