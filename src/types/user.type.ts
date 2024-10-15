@@ -15,11 +15,11 @@ export interface Iuser {
     uid:string;
     name: string;
     image?: string;
-    password: string;
+    password?: string;
     address?:Iaddress,
-    phoneNo:string,
-    dob:Date,
-    gender: string,
+    phoneNo?:string,
+    dob?:Date,
+    gender?: string,
     role:string,
     createdAt:Date,
     updatedAt: Date,
