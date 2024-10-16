@@ -4,7 +4,7 @@ import { Iaddress } from "./user.type";
 export interface Ishop{
     name: string,
     address?: Iaddress,
-    owner: ObjectId,
+    owner: String,
     category?: any,
     rating: string,
     images?: string[];

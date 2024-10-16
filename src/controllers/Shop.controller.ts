@@ -23,23 +23,23 @@ export const createShop = async (req: Request, res: Response): Promise<void> => 
         const secure_urls = uploadResults.map(result => result.secure_url);
         console.log('Uploaded URLs:', secure_urls);
 
-        const owner = new mongoose.Types.ObjectId(req.params.id);
+        const owner = req.params.id;
         const shopData: any = { 
             ...req.body, 
-            owner: owner.toString(), 
-            image: secure_urls 
+            owner: owner,
+            images: secure_urls 
         };
         
         console.log('Shop data before validation:', JSON.stringify(shopData, null, 2));
 
-        const { error, value } = shopValidator(shopData);
-        if (error) {
-            console.error('Validation error:', error.details);
-            res.status(400).json({ error: error.details[0].message });
-            return;
-        }
+        // const { error, value } = shopValidator(shopData);
+        // if (error) {
+        //     console.error('Validation error:', error.details);
+        //     res.status(400).json({ error: error.details[0].message });
+        //     return;
+        // }
 
-        const newShop = new Shop(value);
+        const newShop = new Shop(shopData);
         const savedShop = await newShop.save();
         console.log('Saved shop:', savedShop);
 
@@ -61,7 +61,17 @@ export const createShop = async (req: Request, res: Response): Promise<void> => 
         });
     }
 };
-
+export const getShopByUid=async (req: Request, res: Response): Promise<any>=>{
+    try {
+        const ownerId= req.params.id;
+        const shop = await Shop.find({owner:ownerId});
+        if (!shop) return res.status(404).json({ message: 'Shop not found' });
+        return res.json(shop);
+    } catch (error) {
+        console.error('Error getting shop:', error);
+        return res.status(500).json({ error: error });
+    }
+}
 export const getShops= async (req: Request, res: Response): Promise<any>=>{
     try {
         const shops = await Shop.find();

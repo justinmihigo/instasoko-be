@@ -6,11 +6,12 @@ const shopSchema=new Schema<Ishop>({
     category: {},
     address: {type: Object, default:{}, required:false},
     images: { type: [String], default: [], required: true },
-    owner: {type: Schema.Types.ObjectId, ref: 'User'},
+    owner: {type: String},
     rating: {type: String},
     tagline: {type: String},
     description : {type: String},
     createdAt: {type: Date, default: Date.now()},
     updatedAt: {type: Date, default: Date.now()}
 });
+shopSchema.index({owner:1 },{unique:true});
 export default model("Shop", shopSchema);
