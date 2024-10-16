@@ -4,12 +4,14 @@ import { config } from 'dotenv';
 import dbConnection from './config/db';
 import router from './routes/user.routes';
 import shopRoutes from './routes/shop.routes';
-import notificationRoutes from  './routes/notification.routes'
+import notificationRoutes from  './routes/notification.routes';
+import cors from 'cors';
 import upload from './config/multer';
 config();
 const app:Express = express();
 const PORT=process.env.PORT
 app.use(express.json());
+app.use(cors());
 app.use(bodyparser.json());
 app.use(express.urlencoded({ extended: true }));
 

@@ -11,15 +11,18 @@ export const createUser = async (req: Request, res: Response): Promise<any> => {
             const result= await cloudinary.uploader.upload(profilePic.path);
             req.body.image=result.secure_url;
         }
-        console.log(req.body);
-        const { email, name, password, address,image, dob, uid, gender } = req.body;
-        const newDob = new Date(dob);
-        const { error, value } = signupValidator(req.body);
-        if (error) return res.status(400).json({ error: error.message });
-        const newUser = new User({ email, name,image,password, uid, address, dob: newDob, gender });
+        console.dir(req.body);
+        // const { email, name, password, address,image, dob, uid, gender } = req.body;
+        // const newDob = new Date(dob);
+        // const { error, value } = signupValidator(req.body);
+        // console.log('this is the fucking error', error);
+        // if (error) return res.status(400).json({ error: error.message });
+        const newUser = new User(req.body);
         await newUser.save();
-        res.status(201).json({ newUser: newUser });
+        console.log(newUser);
+        return res.status(201).json({ newUser: newUser });
     } catch (error) {
+        console.log(error)
         res.status(400).json({ error });
     }
 
