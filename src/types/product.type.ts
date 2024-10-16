@@ -8,10 +8,10 @@ export default interface IProduct{
     price: any,
     discount: number,
     availabilityCount: number,
-    cartCount: number,
+    cartCount?: any,
     color?: string[],
     size?: string[],
     weight: string,
-    categoryId?: ObjectId,
+    categoryId?: any,
     
 }

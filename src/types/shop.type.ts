@@ -6,6 +6,7 @@ export interface Ishop{
     address?: Iaddress,
     owner: String,
     category?: any,
+    location: {lat:any, lng:any},
     rating: string,
     images?: string[];
     tagline: string,

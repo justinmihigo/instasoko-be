@@ -22,11 +22,12 @@ export const createShop = async (req: Request, res: Response): Promise<void> => 
         
         const secure_urls = uploadResults.map(result => result.secure_url);
         console.log('Uploaded URLs:', secure_urls);
-
+       const {lat,lng}=req.body;
         const owner = req.params.id;
         const shopData: any = { 
             ...req.body, 
             owner: owner,
+            location:{lat,lng},
             images: secure_urls 
         };
         

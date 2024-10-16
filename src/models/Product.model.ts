@@ -8,10 +8,10 @@ const productSchema= new Schema<IProduct>({
     price: {type: Number, required: true},
     discount: {type: Number, default: 0},
     availabilityCount: {type: Number, required: true},
-    cartCount: {type: Number, required: true},
+    cartCount: {type: Schema.Types.Mixed, required: true},
     color: {type:[String], required: true},
     size: {type:[String], required: true},
     weight:{type:String, required: true},
-    categoryId: {type:Schema.Types.ObjectId, ref:"Category"},
+    categoryId: {},
 })
 export default model<IProduct>("Product",productSchema);

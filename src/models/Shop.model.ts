@@ -4,6 +4,7 @@ import { Ishop } from "../types/shop.type";
 const shopSchema=new Schema<Ishop>({
     name: {type: String},
     category: {},
+    location: {type:Schema.Types.Mixed, default:{}},
     address: {type: Object, default:{}, required:false},
     images: { type: [String], default: [], required: true },
     owner: {type: String},
