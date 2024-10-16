@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/xBoost1000/isBackend#readme",
   "dependencies": {
+    "@imgly/background-removal-node": "^1.4.5",
     "body-parser": "^1.20.3",
     "cloudinary": "^2.5.1",
     "cors": "^2.8.5",

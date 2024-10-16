@@ -6,7 +6,9 @@ import router from './routes/user.routes';
 import shopRoutes from './routes/shop.routes';
 import notificationRoutes from  './routes/notification.routes';
 import cors from 'cors';
+import productRoutes from './routes/product.routes'
 import upload from './config/multer';
+import orderRoutes from './routes/order.routes';
 config();
 const app:Express = express();
 const PORT=process.env.PORT
@@ -14,11 +16,11 @@ app.use(express.json());
 app.use(cors());
 app.use(bodyparser.json());
 app.use(express.urlencoded({ extended: true }));
-
 app.use('/users',router);
 app.use('/shops', shopRoutes);
 app.use('/notifications',notificationRoutes)
-
+app.use('/products',productRoutes);
+app.use('/orders', orderRoutes);
 app.use((err:any, req:any, res:any, next:any) => {
     console.error('Unhandled error:', err);
     

@@ -1,10 +1,9 @@
 import mongoose, {Types,Schema} from "mongoose";
 import { Iuser, Iaddress } from "../types/user.type";
-import { required } from "joi";
 
 const userSchema=new Schema<Iuser>({
     email: {type: String},
-    uid:{type: String, default:"",  unique:true, required:true},
+    uid:{type: String, default:"",  unique:true, required:true, index:true},
     name: {type:String},
     password: {type:String},
     image:{type:String, default:""},
@@ -16,5 +15,6 @@ const userSchema=new Schema<Iuser>({
     createdAt: {type: Date, default: Date.now()},
     updatedAt: {type: Date, default: Date.now()}
 })
+userSchema.index({uid:1},{unique:true});
 export default mongoose.model("User",userSchema);
    
