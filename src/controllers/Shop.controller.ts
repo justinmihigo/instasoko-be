@@ -75,7 +75,7 @@ export const getShopByUid=async (req: Request, res: Response): Promise<any>=>{
 }
 export const getShops= async (req: Request, res: Response): Promise<any>=>{
     try {
-        const shops = await Shop.find();
+        const shops = await Shop.find().sort({'createdAt':-1})
         return res.json(shops);
     } catch (error) {
         console.error('Error getting shops:', error);
