@@ -4,6 +4,8 @@ import { Iaddress } from "./user.type";
 export interface Ishop{
     name: string,
     address?: Iaddress,
+    phone?: string,
+    email?:string,
     owner: String,
     category?: any,
     location: {lat:any, lng:any},

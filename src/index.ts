@@ -9,6 +9,7 @@ import cors from 'cors';
 import productRoutes from './routes/product.routes'
 import upload from './config/multer';
 import orderRoutes from './routes/order.routes';
+import categoryRoutes from './routes/category.routes';
 config();
 const app:Express = express();
 const PORT=process.env.PORT
@@ -21,6 +22,7 @@ app.use('/shops', shopRoutes);
 app.use('/notifications',notificationRoutes)
 app.use('/products',productRoutes);
 app.use('/orders', orderRoutes);
+app.use('/categories', categoryRoutes)
 app.use((err:any, req:any, res:any, next:any) => {
     console.error('Unhandled error:', err);
     

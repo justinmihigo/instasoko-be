@@ -18,20 +18,26 @@ export const createProduct = async (req: Request, res: Response): Promise<any> =
         }
         const processedImages = await Promise.all(files.map(async (file) => {
             const dataURL = await removeBg(file.path);
-            const base64Data = dataURL.replace("data:image/png;base64","");
+            const base64Data = dataURL.replace("data:image/png;base64", "");
             const buffer = Buffer.from(base64Data, 'base64');
-            const tempFilePath = path.join('./public', `${Math.floor(Math.random()*1000)+5}.png`);
+            const tempFilePath = path.join('./public', `${Math.floor(Math.random() * 1000) + 5}.png`);
             await writeFile(tempFilePath, buffer);
             return tempFilePath;
         }));
         console.log(processedImages);
-        const uploadPromises = processedImages.map((dataURL) => 
-            cloudinary.uploader.upload(dataURL)
+        const uploadPromises = processedImages.map((dataURL) =>
+            cloudinary.uploader.upload(dataURL, {
+                transformation: [{
+                    width: 480,
+                    height: 360,
+                    crop: 'fill'
+                }]
+            })
         );
         const uploadResults = await Promise.all(uploadPromises);
         const secure_urls = uploadResults.map(result => result.secure_url);
         console.log('Uploaded URLs:', secure_urls);
-        
+
         const owner = new mongoose.Types.ObjectId(shopId);
         const productData: any = {
             ...req.body,
@@ -91,19 +97,35 @@ export const deleteProduct = async (req: Request, res: Response): Promise<any> =
 export const updateProduct = async (req: Request, res: Response): Promise<any> => {
     try {
         const shopId = req.params.shopId
-        const productId= req.params.id
+        const productId = req.params.id
         const files = req.files as Express.Multer.File[];
         if (files) {
-            const uploadPromises = files.map((file) => cloudinary.uploader.upload(file.path,{background_remover:"cloudinary_ai"}));
+            const processedImages = await Promise.all(files.map(async (file) => {
+                const dataURL = await removeBg(file.path);
+                const base64Data = dataURL.replace("data:image/png;base64", "");
+                const buffer = Buffer.from(base64Data, 'base64');
+                const tempFilePath = path.join('./public', `${Math.floor(Math.random() * 1000) + 5}.png`);
+                await writeFile(tempFilePath, buffer);
+                return tempFilePath;
+            }));
+            console.log(processedImages);
+            const uploadPromises = processedImages.map((dataURL) =>
+                cloudinary.uploader.upload(dataURL,  {
+                    transformation: [{
+                        width: 480,
+                        height: 360,
+                        crop: 'fill'
+                    }]
+                })
+            );
             const uploadResults = await Promise.all(uploadPromises);
-
             const secure_urls = uploadResults.map(result => result.secure_url);
             console.log('Uploaded URLs:', secure_urls);
-            req.body.images=secure_urls;
+            req.body.images = secure_urls;
         }
 
         if (req.body) {
-            const product = await Product.findByIdAndUpdate({_id:productId}, req.body, {new:true});
+            const product = await Product.findByIdAndUpdate({ _id: productId }, req.body, { new: true });
             res.status(200).json(product);
         }
         else {
