@@ -28,12 +28,13 @@ export const createShop = async (req: Request, res: Response): Promise<void> => 
 
         const secure_urls = uploadResults.map(result => result.secure_url);
         console.log('Uploaded URLs:', secure_urls);
-        const { lat, lng } = req.body;
+        const { lat, lng } = req.body as any;
+        const coordinates:number[]= [Number(lng),Number(lat)]
         const owner = req.params.id;
         const shopData: any = {
             ...req.body,
             owner: owner,
-            location: { lat, lng },
+            location: { type:'Point', coordinates:coordinates},
             images: secure_urls
         };
 
@@ -116,6 +117,12 @@ export const updateShop = async (req: Request, res: Response): Promise<any> => {
             console.log('Uploaded URLs:', secure_urls);
             req.body.image = secure_urls;
         }
+
+        const {lat, lng}= req.body;
+        if(lat && lng){
+            req.body.location= { type:'Point', coordinates:[Number(lng),Number(lat)]}  ;
+        }
+        
         const shop = await Shop.findByIdAndUpdate(req.params.shopId, req.body, { new: true });
         if (!shop) return res.status(404).json({ message: 'Shop not found' });
         shop.updatedAt = new Date();
@@ -126,6 +133,7 @@ export const updateShop = async (req: Request, res: Response): Promise<any> => {
         return res.status(500).json({ error: error });
     }
 }
+
 export const deleteShop = async (req: Request, res: Response): Promise<any> => {
     try {
         const shop = await Shop.findByIdAndDelete(req.params.shopId);
@@ -134,5 +142,21 @@ export const deleteShop = async (req: Request, res: Response): Promise<any> => {
     } catch (error) {
         console.error('Error deleting shop:', error);
         return res.status(500).json({ error: error });
+    }
+}
+
+export const findShopByLocation= async(req:Request, res:Response): Promise<any>=>{
+    try {
+        const {lng,lat}=req.body;
+        const coordinates= [lng,lat];
+        console.log(coordinates);
+        if(req.body){
+            const shops= await Shop.find({location:{$geoWithin:{$centerSphere:[coordinates, 5/3963.2]}}})
+            return res.status(200).json(shops);
+        }
+        else return res.status(404).json({error: "enter the coordinates"} )
+       
+    } catch (error) {
+        res.status(500).json({ message: 'Internal server error', error });
     }
 }

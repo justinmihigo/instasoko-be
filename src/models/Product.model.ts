@@ -5,6 +5,7 @@ const productSchema= new Schema<IProduct>({
     shopId:{type:Schema.Types.ObjectId, ref:"Shop"},
     images: {type:[String], default:[]},
     model:{type: String},
+    location:{type:Schema.Types.Mixed, required: true},
     price: {type: Number, required: true},
     discount: {type: Number, default: 0},
     availabilityCount: {type: Number, required: true},
@@ -13,5 +14,6 @@ const productSchema= new Schema<IProduct>({
     size: {type:[String], required: true},
     weight:{type:String, required: true},
     categoryId: {},
-})
+});
+productSchema.index({location:"2dsphere"});
 export default model<IProduct>("Product",productSchema);

@@ -4,6 +4,7 @@ export default interface IProduct{
     name:string,
     images?: any,
     shopId:ObjectId,
+    location: any,
     model?:string,
     price: any,
     discount: number,

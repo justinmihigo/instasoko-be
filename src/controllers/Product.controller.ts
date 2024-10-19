@@ -37,11 +37,14 @@ export const createProduct = async (req: Request, res: Response): Promise<any> =
         const uploadResults = await Promise.all(uploadPromises);
         const secure_urls = uploadResults.map(result => result.secure_url);
         console.log('Uploaded URLs:', secure_urls);
+        const { lat, lng } = req.body as any;
+        const coordinates: number[] = [Number(lng), Number(lat)]
 
         const owner = new mongoose.Types.ObjectId(shopId);
         const productData: any = {
             ...req.body,
             shopId: owner,
+            location: { type: 'Point', coordinates: coordinates },
             images: secure_urls
         };
         if (req.body) {
@@ -110,7 +113,7 @@ export const updateProduct = async (req: Request, res: Response): Promise<any> =
             }));
             console.log(processedImages);
             const uploadPromises = processedImages.map((dataURL) =>
-                cloudinary.uploader.upload(dataURL,  {
+                cloudinary.uploader.upload(dataURL, {
                     transformation: [{
                         width: 480,
                         height: 360,
@@ -122,6 +125,10 @@ export const updateProduct = async (req: Request, res: Response): Promise<any> =
             const secure_urls = uploadResults.map(result => result.secure_url);
             console.log('Uploaded URLs:', secure_urls);
             req.body.images = secure_urls;
+        }
+        const { lat, lng } = req.body;
+        if (lat && lng) {
+            req.body.location = { type: 'Point', coordinates: [Number(lng), Number(lat)] };
         }
 
         if (req.body) {
@@ -139,4 +146,63 @@ export const updateProduct = async (req: Request, res: Response): Promise<any> =
 
 }
 
+export const findProductByLocation = async (req: Request, res: Response): Promise<any> => {
+    try {
+        const { lng, lat, name } = req.body;
+        const coordinates = [lng, lat];
+        console.log(coordinates);
+        if (req.body) {
+            // const products = await Product.aggregate(
+            //     [
+            //         {
+            //           $search: {
+            //             index: "productSearch",
+            //             text: {
+            //               query: name,
+            //               path: {
+            //                 wildcard: "*"
+            //               }
+            //             }
+            //           }
+            //         }
+            //       ])
+            // // .find({
+            // //     // name: { $regex: name, $options: 'i' },
+            // //     location:
+            // //     {
+            // //         $geoWithin: {
+            // //             $centerSphere: [coordinates, 5 / 3963.2]
+            // //         }
+            // //     }
+            // // })
+            const products= await Product.aggregate([
+                {
+                  $search: {
+                    index: "productSearch",
+                    text: {
+                      query: name,
+                      path: {
+                        wildcard: "*"
+                      }
+                    }
+                  }
+                },
+                {
+                  $match: {
+                    location: {
+                      $geoWithin: {
+                        $centerSphere: [coordinates, 5 / 3963.2]
+                      }
+                    }
+                  }
+                }
+              ]);
+            return res.status(200).json(products);
+        }
+        else return res.status(404).json({ error: "enter the coordinates" })
+
+    } catch (error) {
+        res.status(500).json({ message: 'Internal server error', error });
+    }
+}
 

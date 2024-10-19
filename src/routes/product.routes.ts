@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createProduct, deleteProduct, getAllProducts, getProduct, updateProduct } from "../controllers/Product.controller";
+import { createProduct, deleteProduct, findProductByLocation, getAllProducts, getProduct, updateProduct } from "../controllers/Product.controller";
 import upload from "../config/multer";
 const router=Router();
 
@@ -8,6 +8,6 @@ router.get('/:shopId/getProduct/:id',getProduct);
 router.get('/:shopId/getProducts',getAllProducts);
 router.delete('/:shopId/deleteProduct/:id',deleteProduct);
 router.patch('/:shopId/updateProduct/:id',updateProduct);
-
+router.get('/findProducts', findProductByLocation)
 
 export default router
