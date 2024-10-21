@@ -152,29 +152,15 @@ export const findProductByLocation = async (req: Request, res: Response): Promis
         const coordinates = [lng, lat];
         console.log(coordinates);
         if (req.body) {
-            // const products = await Product.aggregate(
-            //     [
-            //         {
-            //           $search: {
-            //             index: "productSearch",
-            //             text: {
-            //               query: name,
-            //               path: {
-            //                 wildcard: "*"
-            //               }
-            //             }
-            //           }
+            // .find({
+            //     // name: { $regex: name, $options: 'i' },
+            //     location:
+            //     {
+            //         $geoWithin: {
+            //             $centerSphere: [coordinates, 5 / 3963.2]
             //         }
-            //       ])
-            // // .find({
-            // //     // name: { $regex: name, $options: 'i' },
-            // //     location:
-            // //     {
-            // //         $geoWithin: {
-            // //             $centerSphere: [coordinates, 5 / 3963.2]
-            // //         }
-            // //     }
-            // // })
+            //     }
+            // })
             const products= await Product.aggregate([
                 {
                   $search: {
@@ -197,7 +183,27 @@ export const findProductByLocation = async (req: Request, res: Response): Promis
                   }
                 }
               ]);
-            return res.status(200).json(products);
+              if (products.length!==0){
+                return res.status(200).json(products);
+              }
+              else{
+                const products= await Product.find({
+                    name: { $regex: name, $options: 'i' },
+                    location:
+                    {
+                        $geoWithin: {
+                            $centerSphere: [coordinates, 5 / 3963.2]
+                        }
+                    }
+                });
+                if (products.length!==0){
+                    return res.status(200).json(products);
+                }
+                else{
+                    return res.status(404).json({ message: 'No products found' });
+                }
+              }
+            
         }
         else return res.status(404).json({ error: "enter the coordinates" })
 

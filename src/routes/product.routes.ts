@@ -7,7 +7,7 @@ router.post('/:shopId/createProduct', upload.array("images",5), createProduct);
 router.get('/:shopId/getProduct/:id',getProduct);
 router.get('/:shopId/getProducts',getAllProducts);
 router.delete('/:shopId/deleteProduct/:id',deleteProduct);
-router.patch('/:shopId/updateProduct/:id',updateProduct);
+router.patch('/updateProduct/:id',updateProduct);
 router.get('/findProducts', findProductByLocation)
 
 export default router
