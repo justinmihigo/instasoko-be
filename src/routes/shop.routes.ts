@@ -7,7 +7,7 @@ const router = Router();
 router.post('/:id/createShop', upload.array('images',3), createShop);
 router.get('/getShops/:id', getShopByUid)
 router.get('/getShops', getShops);
-router.get('/getShop/:shopId', getShopById);
+router.get('/getShopbyId/:shopId', getShopById);
 router.patch('/updateShop/:shopId', updateShop);
 router.get('/findShops/', findShopByLocation);
 router.delete('/deleteShop/:shopId', deleteShop);
