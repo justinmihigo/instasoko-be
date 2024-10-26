@@ -13,10 +13,11 @@ import categoryRoutes from './routes/category.routes';
 config();
 const app:Express = express();
 const PORT=process.env.PORT
-app.use(express.json());
+app.use(express.json({limit: "50mb"}));
 app.use(cors());
-app.use(bodyparser.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(bodyparser.json({limit: "50mb"}));
+app.use(bodyparser.urlencoded({extended:true, limit:"50mb"}));
+app.use(express.urlencoded({ extended: true, limit:"50mb"}));
 app.use('/users',router);
 app.use('/shops', shopRoutes);
 app.use('/notifications',notificationRoutes)
