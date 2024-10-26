@@ -29,12 +29,12 @@ export const createShop = async (req: Request, res: Response): Promise<void> => 
         const secure_urls = uploadResults.map(result => result.secure_url);
         console.log('Uploaded URLs:', secure_urls);
         const { lat, lng } = req.body as any;
-        const coordinates:number[]= [Number(lng),Number(lat)]
+        const coordinates: number[] = [Number(lng), Number(lat)]
         const owner = req.params.id;
         const shopData: any = {
             ...req.body,
             owner: owner,
-            location: { type:'Point', coordinates:coordinates},
+            location: { type: 'Point', coordinates: coordinates },
             images: secure_urls
         };
 
@@ -103,26 +103,65 @@ export const getShopById = async (req: Request, res: Response): Promise<any> => 
 export const updateShop = async (req: Request, res: Response): Promise<any> => {
     try {
         const files = req.files as Express.Multer.File[];
-        if (files && files.length > 0) {
-            const uploadPromises = files.map((file) => cloudinary.uploader.upload(file.path, {
-                transformation: [{
-                    width: 480,
-                    height: 360,
-                    crop: 'fill'
-                }]
-            }));
-            const uploadResults = await Promise.all(uploadPromises);
+        let finalImages: string[] = [];
 
-            const secure_urls = uploadResults.map(result => result.secure_url);
-            console.log('Uploaded URLs:', secure_urls);
-            req.body.image = secure_urls;
+        // Handle existing and new images
+        if (req.body.images && Array.isArray(req.body.images)) {
+            // Handle existing cloudinary URLs
+            const existingUrls = req.body.images.filter((image: any) =>
+                typeof image === 'string' && image.includes('cloudinary')
+            );
+            finalImages = [...existingUrls];
+
+            // Handle new file uploads
+            const newImages = req.body.images.filter((image: any) =>
+                typeof image === 'object' && image.path
+            );
+
+            if (newImages.length > 0) {
+                try {
+                    const uploadPromises = newImages.map((image: any) =>
+                        cloudinary.uploader.upload(image.path, {
+                            transformation: [{
+                                width: 480,
+                                height: 360,
+                                crop: 'fill'
+                            }]
+                        })
+                    );
+
+                    const uploadedImages = await Promise.all(uploadPromises);
+                    const newUrls = uploadedImages.map(result => result.secure_url);
+                    finalImages = [...finalImages, ...newUrls];
+                    req.body.images = finalImages;
+                } catch (uploadError) {
+                    console.error('Error uploading images:', uploadError);
+                    return res.status(500).json({ error: 'Image upload failed' });
+                }
+            }
         }
 
-        const {lat, lng}= req.body;
-        if(lat && lng){
-            req.body.location= { type:'Point', coordinates:[Number(lng),Number(lat)]}  ;
+        // if (files && files.length > 0) {
+        //     const uploadPromises = files.map((file) => cloudinary.uploader.upload(file.path, {
+        //         transformation: [{
+        //             width: 480,
+        //             height: 360,
+        //             crop: 'fill'
+        //         }]
+        //     }));
+        //     const uploadResults = await Promise.all(uploadPromises);
+
+        //     const secure_urls = uploadResults.map(result => result.secure_url);
+        //     console.log('Uploaded URLs:', secure_urls);
+        //     req.body.images = secure_urls;
+        // }
+
+        const { lat, lng } = req.body;
+        console.log(req.body)
+        if (lat && lng) {
+            req.body.location = { type: 'Point', coordinates: [Number(lng), Number(lat)] };
         }
-        
+
         const shop = await Shop.findByIdAndUpdate(req.params.shopId, req.body, { new: true });
         if (!shop) return res.status(404).json({ message: 'Shop not found' });
         shop.updatedAt = new Date();
@@ -145,17 +184,17 @@ export const deleteShop = async (req: Request, res: Response): Promise<any> => {
     }
 }
 
-export const findShopByLocation= async(req:Request, res:Response): Promise<any>=>{
+export const findShopByLocation = async (req: Request, res: Response): Promise<any> => {
     try {
-        const {lng,lat}=req.body;
-        const coordinates= [lng,lat];
+        const { lng, lat } = req.body;
+        const coordinates = [lng, lat];
         console.log(coordinates);
-        if(req.body){
-            const shops= await Shop.find({location:{$geoWithin:{$centerSphere:[coordinates, 5/3963.2]}}})
+        if (req.body) {
+            const shops = await Shop.find({ location: { $geoWithin: { $centerSphere: [coordinates, 5 / 3963.2] } } })
             return res.status(200).json(shops);
         }
-        else return res.status(404).json({error: "enter the coordinates"} )
-       
+        else return res.status(404).json({ error: "enter the coordinates" })
+
     } catch (error) {
         res.status(500).json({ message: 'Internal server error', error });
     }

@@ -7,6 +7,7 @@ import removeBg, { freePublic } from "../config/bgRemover"
 import { writeFile } from "fs/promises"
 import fs from "fs"
 import path from "path"
+import getDistance from "@turf/distance"
 import { fsync } from "fs"
 
 export const createProduct = async (req: Request, res: Response): Promise<any> => {
@@ -150,65 +151,75 @@ export const findProductByLocation = async (req: Request, res: Response): Promis
     try {
         const { lng, lat, name } = req.body;
         const coordinates = [lng, lat];
+        const distance= getDistance(coordinates,coordinates);
+        const radiusInMiles = [1, 3, 5];
         console.log(coordinates);
         if (req.body) {
-            // .find({
-            //     // name: { $regex: name, $options: 'i' },
-            //     location:
-            //     {
-            //         $geoWithin: {
-            //             $centerSphere: [coordinates, 5 / 3963.2]
-            //         }
-            //     }
-            // })
-            const products= await Product.aggregate([
-                {
-                  $search: {
-                    index: "productSearch",
-                    text: {
-                      query: name,
-                      path: {
-                        wildcard: "*"
-                      }
-                    }
-                  }
-                },
-                {
-                  $match: {
-                    location: {
-                      $geoWithin: {
-                        $centerSphere: [coordinates, 5 / 3963.2]
-                      }
-                    }
-                  }
-                }
-              ]);
-              if (products.length!==0){
-                return res.status(200).json(products);
-              }
-              else{
-                const products= await Product.find({
-                    name: { $regex: name, $options: 'i' },
-                    location:
+            for (const radius of radiusInMiles) {
+                console.log("the current radius is ", radius)
+                const products = await Product.aggregate([
                     {
-                        $geoWithin: {
-                            $centerSphere: [coordinates, 5 / 3963.2]
+                        $search: {
+                            index: "productSearch",
+                            text: {
+                                query: name,
+                                path: {
+                                    wildcard: "*"
+                                }
+                            }
                         }
+                    },
+
+                    {
+                      $match: {
+                        location: {
+                          $geoWithin: {
+                            $centerSphere: [coordinates, 5 / 3963.2]
+                          }
+                        }
+                      }
                     }
-                });
-                if (products.length!==0){
+                ]).limit(10);
+                if (products.length !== 0) {
+                    console.log('aggreage')
                     return res.status(200).json(products);
                 }
-                else{
-                    return res.status(404).json({ message: 'No products found' });
+                else {
+                    const products = await Product.find({
+                        name: { $regex: name, $options: 'i' },
+                        location:
+                        {
+                            $geoWithin: {
+                                $centerSphere: [coordinates, 5 / 3963.2]
+                            }
+                        }
+                    }).limit(10);
+                    if (products.length !== 0) {
+                        return res.status(200).json(products);
+                    }
+                    else {
+                        const finalSearch = await Product.aggregate([{
+                            $search: {
+                                index: "productSearch",
+                                text: {
+                                    query: name,
+                                    path: {
+                                        wildcard: "*"
+                                    }
+                                }
+                            }
+                        }]).limit(10);
+                        return res.status(404).json({ message: 'No products found', finalSearch });
+                    }
                 }
-              }
-            
+            }
+
         }
         else return res.status(404).json({ error: "enter the coordinates" })
 
     } catch (error) {
         res.status(500).json({ message: 'Internal server error', error });
     }
+
 }
 
