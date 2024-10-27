@@ -3,6 +3,7 @@ import { Request, Response } from 'express';
 import shopValidator from "../utils/shop.validation";
 import { Ishop } from "../types/shop.type";
 import cloudinary from "../utils/cloudinary";
+import { freePublic } from "../config/bgRemover";
 
 export const createShop = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -68,6 +69,9 @@ export const createShop = async (req: Request, res: Response): Promise<void> => 
             error: error instanceof Error ? error.message : 'Unknown error'
         });
     }
+    finally{
+        freePublic();
+    }
 };
 export const getShopByUid = async (req: Request, res: Response): Promise<any> => {
     try {
@@ -103,18 +107,19 @@ export const getShopById = async (req: Request, res: Response): Promise<any> => 
 export const updateShop = async (req: Request, res: Response): Promise<any> => {
     try {
         const files = req.files as Express.Multer.File[];
-        let finalImages: string[] = [];
+        let finalImages: any[] = [];
 
         // Handle existing and new images
-        if (req.body.images && Array.isArray(req.body.images)) {
+        if (files) {
+            
             // Handle existing cloudinary URLs
-            const existingUrls = req.body.images.filter((image: any) =>
+            const existingUrls = files.filter((image: any) =>
                 typeof image === 'string' && image.includes('cloudinary')
             );
             finalImages = [...existingUrls];
 
             // Handle new file uploads
-            const newImages = req.body.images.filter((image: any) =>
+            const newImages = files.filter((image: any) =>
                 typeof image === 'object' && image.path
             );
 
@@ -133,6 +138,7 @@ export const updateShop = async (req: Request, res: Response): Promise<any> => {
                     const uploadedImages = await Promise.all(uploadPromises);
                     const newUrls = uploadedImages.map(result => result.secure_url);
                     finalImages = [...finalImages, ...newUrls];
+                    // console.log('finalImages: ', finalImages);
                     req.body.images = finalImages;
                 } catch (uploadError) {
                     console.error('Error uploading images:', uploadError);
@@ -140,21 +146,6 @@ export const updateShop = async (req: Request, res: Response): Promise<any> => {
                 }
             }
         }
-
-        // if (files && files.length > 0) {
-        //     const uploadPromises = files.map((file) => cloudinary.uploader.upload(file.path, {
-        //         transformation: [{
-        //             width: 480,
-        //             height: 360,
-        //             crop: 'fill'
-        //         }]
-        //     }));
-        //     const uploadResults = await Promise.all(uploadPromises);
-
-        //     const secure_urls = uploadResults.map(result => result.secure_url);
-        //     console.log('Uploaded URLs:', secure_urls);
-        //     req.body.images = secure_urls;
-        // }
 
         const { lat, lng } = req.body;
         console.log(req.body)
@@ -166,10 +157,13 @@ export const updateShop = async (req: Request, res: Response): Promise<any> => {
         if (!shop) return res.status(404).json({ message: 'Shop not found' });
         shop.updatedAt = new Date();
         shop.save();
-        return res.json(shop);
+        return res.status(200).json(shop);
     } catch (error) {
         console.error('Error updating shop:', error);
         return res.status(500).json({ error: error });
+    }
+    finally{
+        freePublic();
     }
 }
 
