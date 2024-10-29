@@ -2,7 +2,6 @@ import mongoose from "mongoose"
 import Product from "../models/Product.model"
 import { Request, Response } from "express"
 import cloudinary from "../utils/cloudinary"
-import removeBg, { freePublic } from "../config/bgRemover"
 // import { writeFile } from "fs/promises"
 // import fs from "fs"
 // import path from "path"
@@ -59,9 +58,6 @@ export const createProduct = async (req: Request, res: Response): Promise<any> =
     } catch (error) {
         console.log(error);
         res.status(500).json(error);
-    }
-    finally{
-        freePublic();
     }
 
 
