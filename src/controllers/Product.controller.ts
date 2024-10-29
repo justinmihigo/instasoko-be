@@ -1,14 +1,13 @@
 import mongoose from "mongoose"
 import Product from "../models/Product.model"
-import IProduct from "../types/product.type"
 import { Request, Response } from "express"
 import cloudinary from "../utils/cloudinary"
 import removeBg, { freePublic } from "../config/bgRemover"
-import { writeFile } from "fs/promises"
-import fs from "fs"
-import path from "path"
-import getDistance from "@turf/distance"
-import { fsync } from "fs"
+// import { writeFile } from "fs/promises"
+// import fs from "fs"
+// import path from "path"
+// import { fsync } from "fs"
+
 
 export const createProduct = async (req: Request, res: Response): Promise<any> => {
     try {
@@ -17,17 +16,17 @@ export const createProduct = async (req: Request, res: Response): Promise<any> =
         if (!files || files.length == 0) {
             return res.status(404).json({ message: "Enter at least one image" });
         }
-        const processedImages = await Promise.all(files.map(async (file) => {
-            const dataURL = await removeBg(file.path);
-            const base64Data = dataURL.replace("data:image/png;base64", "");
-            const buffer = Buffer.from(base64Data, 'base64');
-            const tempFilePath = path.join('./public', `${Math.floor(Math.random() * 1000) + 5}.png`);
-            await writeFile(tempFilePath, buffer);
-            return tempFilePath;
-        }));
-        console.log(processedImages);
-        const uploadPromises = processedImages.map((dataURL) =>
-            cloudinary.uploader.upload(dataURL, {
+        // const processedImages = await Promise.all(files.map(async (file) => {
+        //     const dataURL = await removeBg(file.path);
+        //     const base64Data = dataURL.replace("data:image/png;base64", "");
+        //     const buffer = Buffer.from(base64Data, 'base64');
+        //     const tempFilePath = path.join('./public', `${Math.floor(Math.random() * 1000) + 5}.png`);
+        //     await writeFile(tempFilePath, buffer);
+        //     return tempFilePath;
+        // }));
+        // console.log(processedImages);
+        const uploadPromises = files.map((file) =>
+            cloudinary.uploader.upload(file.path, {
                 transformation: [{
                     width: 480,
                     height: 360,
@@ -56,10 +55,13 @@ export const createProduct = async (req: Request, res: Response): Promise<any> =
         else {
             return res.status(400).json({ message: "error creating product" });
         }
-        freePublic();
+       
     } catch (error) {
         console.log(error);
         res.status(500).json(error);
+    }
+    finally{
+        freePublic();
     }
 
 
@@ -104,17 +106,17 @@ export const updateProduct = async (req: Request, res: Response): Promise<any> =
         const productId = req.params.id
         const files = req.files as Express.Multer.File[];
         if (files) {
-            const processedImages = await Promise.all(files.map(async (file) => {
-                const dataURL = await removeBg(file.path);
-                const base64Data = dataURL.replace("data:image/png;base64", "");
-                const buffer = Buffer.from(base64Data, 'base64');
-                const tempFilePath = path.join('./public', `${Math.floor(Math.random() * 1000) + 5}.png`);
-                await writeFile(tempFilePath, buffer);
-                return tempFilePath;
-            }));
-            console.log(processedImages);
-            const uploadPromises = processedImages.map((dataURL) =>
-                cloudinary.uploader.upload(dataURL, {
+            // const processedImages = await Promise.all(files.map(async (file) => {
+            //     const dataURL = await removeBg(file.path);
+            //     const base64Data = dataURL.replace("data:image/png;base64", "");
+            //     const buffer = Buffer.from(base64Data, 'base64');
+            //     const tempFilePath = path.join('./public', `${Math.floor(Math.random() * 1000) + 5}.png`);
+            //     await writeFile(tempFilePath, buffer);
+            //     return tempFilePath;
+            // }));
+            // console.log(processedImages);
+            const uploadPromises = files.map((file) =>
+                cloudinary.uploader.upload(file.path, {
                     transformation: [{
                         width: 480,
                         height: 360,
@@ -151,7 +153,6 @@ export const findProductByLocation = async (req: Request, res: Response): Promis
     try {
         const { lng, lat, name } = req.body;
         const coordinates = [lng, lat];
-        const distance= getDistance(coordinates,coordinates);
         const radiusInMiles = [1, 3, 5];
         console.log(coordinates);
         if (req.body) {

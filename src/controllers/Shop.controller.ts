@@ -3,7 +3,7 @@ import { Request, Response } from 'express';
 import shopValidator from "../utils/shop.validation";
 import { Ishop } from "../types/shop.type";
 import cloudinary from "../utils/cloudinary";
-import { freePublic } from "../config/bgRemover";
+
 
 export const createShop = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -50,7 +50,6 @@ export const createShop = async (req: Request, res: Response): Promise<void> => 
 
         const newShop = new Shop(shopData);
         const savedShop = await newShop.save();
-        console.log('Saved shop:', savedShop);
 
         res.status(201).json({ newShop: savedShop });
     } catch (error) {
@@ -69,9 +68,7 @@ export const createShop = async (req: Request, res: Response): Promise<void> => 
             error: error instanceof Error ? error.message : 'Unknown error'
         });
     }
-    finally{
-        freePublic();
-    }
+   
 };
 export const getShopByUid = async (req: Request, res: Response): Promise<any> => {
     try {
@@ -161,9 +158,6 @@ export const updateShop = async (req: Request, res: Response): Promise<any> => {
     } catch (error) {
         console.error('Error updating shop:', error);
         return res.status(500).json({ error: error });
-    }
-    finally{
-        freePublic();
     }
 }
 
